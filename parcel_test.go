@@ -32,9 +32,7 @@ func getTestParcel() Parcel {
 func TestAddGetDelete(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err)
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 
@@ -49,11 +47,8 @@ func TestAddGetDelete(t *testing.T) {
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
 	get_parcel, err := store.Get(number)
 	require.NoError(t, err)
-	require.Equal(t, number, get_parcel.Number)
-	require.Equal(t, parcel.Address, get_parcel.Address)
-	require.Equal(t, parcel.Client, get_parcel.Client)
-	require.Equal(t, parcel.Status, get_parcel.Status)
-	require.Equal(t, parcel.CreatedAt, get_parcel.CreatedAt)
+	parcel.Number = number
+	require.Equal(t, parcel, get_parcel)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
@@ -68,9 +63,7 @@ func TestAddGetDelete(t *testing.T) {
 func TestSetAddress(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err)
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 
@@ -97,9 +90,7 @@ func TestSetAddress(t *testing.T) {
 func TestSetStatus(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err)
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 
@@ -124,9 +115,7 @@ func TestSetStatus(t *testing.T) {
 func TestGetByClient(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db")
-	if err != nil {
-		return
-	}
+	require.NoError(t, err)
 	store := NewParcelStore(db)
 
 	parcels := []Parcel{
@@ -169,10 +158,6 @@ func TestGetByClient(t *testing.T) {
 		p, ok := parcelMap[id]
 		require.True(t, ok)
 		// убедитесь, что значения полей полученных посылок заполнены верно
-		require.Equal(t, p.Number, parcel.Number)
-		require.Equal(t, p.Address, parcel.Address)
-		require.Equal(t, p.Client, parcel.Client)
-		require.Equal(t, p.Status, parcel.Status)
-		require.Equal(t, p.CreatedAt, parcel.CreatedAt)
+		require.Equal(t, p, parcel)
 	}
 }

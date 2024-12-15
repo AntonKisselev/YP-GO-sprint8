@@ -35,33 +35,19 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 func (s ParcelStore) Get(number int) (Parcel, error) {
 	// реализуйте чтение строки по заданному number
 	// здесь из таблицы должна вернуться только одна строка
-	row := s.db.QueryRow("SELECT client, status, address, created_at FROM parcel WHERE number = ?", number)
-	var (
-		client     int
-		status     string
-		address    string
-		created_at string
-	)
-	err := row.Scan(&client, &status, &address, &created_at)
+	row := s.db.QueryRow("SELECT number, client, status, address, created_at FROM parcel WHERE number = ?", number)
+	p := Parcel{}
+	err := row.Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 	if err != nil {
 		return Parcel{}, err
 	}
-	// заполните объект Parcel данными из таблицы
-	p := Parcel{
-		Number:    number,
-		Client:    client,
-		Status:    status,
-		Address:   address,
-		CreatedAt: created_at,
-	}
-
 	return p, nil
 }
 
 func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	// реализуйте чтение строк из таблицы parcel по заданному client
 	// здесь из таблицы может вернуться несколько строк
-	rows, err := s.db.Query("SELECT number, status, address, created_at FROM parcel WHERE client = ?", client)
+	rows, err := s.db.Query("SELECT number, client, status, address, created_at FROM parcel WHERE client = ?", client)
 	if err != nil {
 		fmt.Println(err)
 		return []Parcel{}, err
@@ -70,24 +56,17 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 
 	var res []Parcel
 	for rows.Next() {
-		var (
-			number     int
-			status     string
-			address    string
-			created_at string
-		)
-		err := rows.Scan(&number, &status, &address, &created_at)
+		p := Parcel{}
+		err := rows.Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 		if err != nil {
 			fmt.Println(err)
 			return []Parcel{}, err
 		}
-		res = append(res, Parcel{
-			Number:    number,
-			Client:    client,
-			Status:    status,
-			Address:   address,
-			CreatedAt: created_at,
-		})
+		res = append(res, p)
+	}
+	err = rows.Err()
+	if err != nil {
+		return []Parcel{}, err
 	}
 	return res, nil
 }
